@@ -1,2 +1,2 @@
 # asms_demo
-Arduino Stepper Moter Shield demo project.
+Arduino Stepper Motor Shield demo project.
