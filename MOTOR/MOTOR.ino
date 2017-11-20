@@ -76,14 +76,14 @@ void read_data(){
     delay(2);
   } Serial.flush();
         
-    if(data[0]==0x00){        //write Register
+    if(data[0]==0x01){        //write Register
       write_data(data[1],(data[2]<<8)|data[3]);
     }
-    else if(data[0]==0x01){  //read Resister
+    else if(data[0]==0x00){  //read Resister
       unsigned int ReData=read_data(data[1]);
-      Serial.print(ReData);
+      Serial.print(ReData,HEX);
     }
-    else if(data[0]==0x02){   //change the frequncy of the motor  Step
+    else if(data[0]==0x03){   //change the frequncy of the motor  Step
       nStep=0x01&(~nStep);
       targetSpeed=data[1]*256+data[2];
       startSpeed=data[3]*256+data[4];
@@ -95,7 +95,7 @@ void read_data(){
       timer.setTimeout(1);
       timer.restart();
     }
-    else if(data[0]==0x03){   //enable or disable the motor
+    else if(data[0]==0x05){   //enable or disable the motor
       nSleep=0x01&(~nSleep);
       if(nSleep){
         digitalWrite(SLEEP,HIGH);
@@ -104,7 +104,7 @@ void read_data(){
         digitalWrite(SLEEP,LOW);
       }
     }
-    else if(data[0]==0x04){    
+    else if(data[0]==0x02){    
      Dir=0x01&(~Dir);
      if(Dir){
       digitalWrite(DIR,HIGH);
@@ -112,7 +112,7 @@ void read_data(){
       digitalWrite(DIR,LOW);
      }
     }
-    else if(data[0]==0x05){
+    else if(data[0]==0x04){
       digitalWrite(RESET,HIGH);
       delay(1);
       digitalWrite(RESET,LOW);
