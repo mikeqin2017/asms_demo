@@ -7,8 +7,7 @@ RBD::Timer timer;
 #define STEP 3
 #define RESET 8
 #define DIR 4
-#define BIN1 6
-#define BIN2 7
+#define EN_TTL485 2
 
 void motor_pwm(unsigned int delaytime);  //motor driver
 void read_data(void);  //deal with serial data 
@@ -18,7 +17,7 @@ void DRV_init(void);  //RRV8711 inital
 void StepStartStop(void);
 
 unsigned char nSleep,nStep,Dir;
-unsigned int targetSpeed,stopSpeed,startSpeed,accelRate,nowSpeed;
+unsigned long int targetSpeed,stopSpeed,startSpeed,accelRate,nowSpeed;
 unsigned int delayTime,addTime;
 
 void setup() {
@@ -30,30 +29,37 @@ void setup() {
   digitalWrite(SS,LOW);
   
   DRV_init();
+  digitalWrite(SLEEP,HIGH);
 }
 
 void loop() {
     // put your main code here, to run repeatedly:
-    motor_pwm(delayTime); 
-    StepStartStop();
+    digitalWrite(STEP,HIGH);
+    delayMicroseconds(1);
+    digitalWrite(STEP,LOW);
+    delayMicroseconds(1 ); 
+    /*StepStartStop();
     if (Serial.available() > 0) {
       read_data();
     }
+    //Serial.println(delayTime);
+    motor_pwm(delayTime);*/
 }
 void StepStartStop(){
   if(timer.onRestart()) {
     if(nStep){
-       nowSpeed=nowSpeed+accelRate/1000; 
-       delayTime=10000/(nowSpeed/100)-22;
-      
+       nowSpeed=nowSpeed+accelRate/100; 
+       delayTime=1000000/nowSpeed-7;
+       //Serial.println(nowSpeed);
+       
        if(nowSpeed>=targetSpeed){
-        delayTime=10000/(targetSpeed/100)-22;
+        delayTime=1000000/targetSpeed-7;
         timer.stop();
       }
     }
     else{
-        nowSpeed=nowSpeed-accelRate/1000; 
-        delayTime=(10000/(nowSpeed/100)-22);
+        nowSpeed=nowSpeed-accelRate/100; 
+        delayTime=1000000/targetSpeed-7;
       if(nowSpeed<=stopSpeed){
         nowSpeed=0;
         delayTime=0;
@@ -81,18 +87,24 @@ void read_data(){
     }
     else if(data[0]==0x00){  //read Resister
       unsigned int ReData=read_data(data[1]);
-      Serial.print(ReData,HEX);
+      digitalWrite(EN_TTL485,HIGH);
+      Serial.print(ReData);
+      digitalWrite(EN_TTL485,LOW);
     }
     else if(data[0]==0x03){   //change the frequncy of the motor  Step
       nStep=0x01&(~nStep);
-      targetSpeed=data[1]*256+data[2];
+      targetSpeed=data[1]*256+data[2]+data[9]*65536;
       startSpeed=data[3]*256+data[4];
       stopSpeed=data[5]*256+data[6];
       accelRate=data[7]*256+data[8];
+      Serial.println(targetSpeed);
+      Serial.println(startSpeed);
+      Serial.println(stopSpeed);
+      Serial.println(accelRate);
       if(nStep){
       nowSpeed=startSpeed;
       }
-      timer.setTimeout(1);
+      timer.setTimeout(10);
       timer.restart();
     }
     else if(data[0]==0x05){   //enable or disable the motor
@@ -122,9 +134,9 @@ void read_data(){
 
 
 void motor_pwm(unsigned int delaytime){
-  if(delaytime>12){
+  if(delaytime>1){
     digitalWrite(STEP,HIGH);
-    delayMicroseconds(12);
+    delayMicroseconds(1);
     digitalWrite(STEP,LOW);
     delayMicroseconds(delaytime); 
   }
@@ -149,7 +161,7 @@ unsigned int read_data(byte add){
 }
 
 void DRV_init(){
-  unsigned int initData[7]={0x0f21,0x017b,0x0028,0x0096,0x0514,0x083c,0x00f0};
+  unsigned int initData[7]={0x0f39,0x017b,0x0028,0x0096,0x0514,0x083c,0x00f0};
   unsigned char i;
   pinMode(SLEEP,OUTPUT);  //hardware part
   digitalWrite(SLEEP,LOW);
@@ -161,8 +173,8 @@ void DRV_init(){
   digitalWrite(RESET,LOW);
   pinMode(BIN1,OUTPUT);
   digitalWrite(BIN1,LOW);
-  pinMode(BIN2,OUTPUT);
-  digitalWrite(BIN2,LOW);
+  pinMode(EN_TTL485,OUTPUT);
+  digitalWrite(EN_TTL485,LOW);
   
   for(i=0;i<7;i++){          //software part
     write_data(i,initData[i]);  
