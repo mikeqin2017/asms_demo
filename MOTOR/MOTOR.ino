@@ -34,16 +34,12 @@ void setup() {
 
 void loop() {
     // put your main code here, to run repeatedly:
-    digitalWrite(STEP,HIGH);
-    delayMicroseconds(1);
-    digitalWrite(STEP,LOW);
-    delayMicroseconds(1 ); 
-    /*StepStartStop();
+    StepStartStop();
     if (Serial.available() > 0) {
       read_data();
     }
     //Serial.println(delayTime);
-    motor_pwm(delayTime);*/
+    motor_pwm(delayTime);
 }
 void StepStartStop(){
   if(timer.onRestart()) {
@@ -171,8 +167,6 @@ void DRV_init(){
   digitalWrite(DIR,LOW);  
   pinMode(RESET,OUTPUT);
   digitalWrite(RESET,LOW);
-  pinMode(BIN1,OUTPUT);
-  digitalWrite(BIN1,LOW);
   pinMode(EN_TTL485,OUTPUT);
   digitalWrite(EN_TTL485,LOW);
   
