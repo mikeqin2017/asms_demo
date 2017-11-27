@@ -29,7 +29,6 @@ void setup() {
   digitalWrite(SS,LOW);
   
   DRV_init();
-  digitalWrite(SLEEP,HIGH);
 }
 
 void loop() {
