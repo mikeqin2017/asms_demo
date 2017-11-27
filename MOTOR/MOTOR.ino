@@ -54,7 +54,7 @@ void StepStartStop(){
     }
     else{
         nowSpeed=nowSpeed-accelRate/100; 
-        delayTime=1000000/targetSpeed-7;
+        delayTime=1000000/nowSpeed-7;
       if(nowSpeed<=stopSpeed){
         nowSpeed=0;
         delayTime=0;
@@ -156,7 +156,7 @@ unsigned int read_data(byte add){
 }
 
 void DRV_init(){
-  unsigned int initData[7]={0x0f39,0x017b,0x0028,0x0096,0x0514,0x083c,0x00f0};
+  unsigned int initData[7]={0x0f21,0x017b,0x0028,0x0096,0x0514,0x083c,0x00f0};
   unsigned char i;
   pinMode(SLEEP,OUTPUT);  //hardware part
   digitalWrite(SLEEP,LOW);
